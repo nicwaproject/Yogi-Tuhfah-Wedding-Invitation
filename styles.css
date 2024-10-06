@@ -39,8 +39,9 @@ h1 {
 }
 
 #cover h2 {
-    font-family: "Prata", serif;
-    font-weight: 700;
+    font-family: "Playwrite SK", cursive;
+    font-optical-sizing: auto;
+    font-weight: 300;
     font-style: normal;
     margin: 5px 0;
     font-size: 3em;
@@ -54,6 +55,10 @@ p {
     font-weight: 400;
     font-style: normal;
     line-height: 3;
+}
+
+#guest {
+    font-size: 1.3em;
 }
 
 #openInvitation {
@@ -166,8 +171,9 @@ section h2 {
 #section1 h2 {
     font-size: 3em;
     line-height: 1;
-    font-family: "Prata", serif;
-    font-weight: 700;
+    font-family: "Playwrite SK", cursive;
+    font-optical-sizing: auto;
+    font-weight: 300;
     font-style: normal;
 }
 
