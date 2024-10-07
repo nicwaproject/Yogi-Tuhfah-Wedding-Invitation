@@ -250,7 +250,7 @@ section h2 {
 #section2 {
     padding: 40px 20px;
     text-align: center;
-    background-image: url('backgorund2.jpeg');
+    background-image: url('background2.jpeg');
     background-size: cover;
     background-position: center;
     height: auto;
@@ -407,7 +407,7 @@ section h2 {
     padding: 40px 20px;
     text-align: center;
     height: auto;
-    background-image: url('backgorund2.jpeg');
+    background-image: url('background2.jpeg');
     background-size: cover;
     background-position: center;
 }
