@@ -641,9 +641,9 @@ button:hover {
 }
 
 .message-item p {
-    margin: 0;
-    font-size: 0.6em;
-    line-height:1;
+    margin-bottom: 10px;
+    font-size: 0.7em;
+    line-height:1.2;
 }
 
 .attendance-grid {
