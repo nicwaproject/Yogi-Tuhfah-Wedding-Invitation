@@ -643,7 +643,7 @@ button:hover {
 .message-item p {
     margin: 0;
     font-size: 0.6em;
-    line-height:0.8;
+    line-height:1;
 }
 
 .attendance-grid {
