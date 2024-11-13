@@ -13,15 +13,32 @@ const attendanceCountsElement = document.getElementById('attendanceCounts'); // 
 
 const elements = document.querySelectorAll('.zoom-in, .zoom-out');
 
-// Event listener to open the invitation
+// Event listener untuk membuka undangan
 openButton.addEventListener('click', function() {
     invitationCover.style.display = 'none';
     invitationContent.style.display = 'block';
-    audioControls.style.display = 'block'; // Show the audio controls
+    audioControls.style.display = 'block'; // Menampilkan kontrol audio
     togglePlayPause();
 });
 
-// Smooth scrolling for navigation links
+// Fungsi untuk melakukan play/pause pada audio
+let isPlaying = false; // Variabel untuk melacak status audio
+
+function togglePlayPause() {
+    if (isPlaying) {
+        backgroundMusic.pause(); // Hentikan audio
+        playPauseButton.src = 'play.png'; // Ganti ikon menjadi play
+    } else {
+        backgroundMusic.play(); // Putar audio
+        playPauseButton.src = 'pause.png'; // Ganti ikon menjadi pause
+    }
+    isPlaying = !isPlaying; // Toggle status isPlaying
+}
+
+// Event listener untuk tombol play/pause
+playPauseButton.addEventListener('click', togglePlayPause);
+
+// Smooth scrolling untuk tautan navigasi
 document.querySelectorAll('nav ul li a').forEach(anchor => {
     anchor.addEventListener('click', function(event) {
         event.preventDefault();
@@ -31,20 +48,21 @@ document.querySelectorAll('nav ul li a').forEach(anchor => {
     });
 });
 
-// Function to get query parameter value
+// Fungsi untuk mendapatkan parameter query
 function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(param);
 }
 
-// Set guest name from URL parameter
+// Menampilkan nama tamu dari parameter URL
 const guestName = getQueryParam('guest');
 if (guestName) {
     document.getElementById('guest').textContent = guestName;
 }
 
-// Countdown timer
+// Timer hitung mundur
 const targetDate = new Date('2024-10-13T00:00:00');
+let intervalId;
 
 function updateCountdown() {
     const now = new Date();
@@ -52,7 +70,6 @@ function updateCountdown() {
 
     if (timeDiff <= 0) {
         clearInterval(intervalId);
-        timeDiff = 0;
     }
 
     const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
@@ -66,29 +83,12 @@ function updateCountdown() {
     document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
 }
 
-// Update the countdown every second
+// Update hitung mundur setiap detik
 setInterval(updateCountdown, 1000);
-updateCountdown(); // Initialize countdown
+updateCountdown(); // Inisialisasi hitung mundur
 
 
-// Toggle play/pause for the music
-let isPlaying = false;
-
-function togglePlayPause() {
-    if (isPlaying) {
-        backgroundMusic.pause();
-    } else {
-        backgroundMusic.play();
-    }
-    isPlaying = !isPlaying;
-    playPauseButton.src = isPlaying ? 'pause.png' : 'play.png'; // Update button image
-}
-
-// Event listener for the play/pause button
-playPauseButton.addEventListener('click', togglePlayPause);
-
-
-// Animation Control
+// Animasi
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -105,6 +105,9 @@ elements.forEach(element => {
     observer.observe(element);
 });
 
+// Set untuk menyimpan pesan yang sudah ditampilkan
+const displayedMessages = new Set();
+
 // Fungsi untuk menampilkan pesan RSVP
 function fetchMessages() {
     fetch('https://ogik-tuhfah.glitch.me/rsvp')
@@ -113,15 +116,26 @@ function fetchMessages() {
             const messagesContainer = document.getElementById('messages');
             messagesContainer.innerHTML = '';
             data.forEach(message => {
-                const messageElement = document.createElement('div');
-                messageElement.classList.add('message-item');
-                messageElement.innerHTML = `
-                    <h4>${message.name}</h4>
-                    <p>${message.message}</p>
-                    <p class="attendance-status">${message.attendance}</p>
-                `;
-                messagesContainer.appendChild(messageElement);
+                // Buat key unik untuk setiap pesan (bisa menggunakan nama dan isi pesan)
+                const messageKey = `${message.name}-${message.message}`;
+                
+                // Cek apakah pesan sudah ditampilkan
+                if (!displayedMessages.has(messageKey)) {
+                    displayedMessages.add(messageKey); // Tambahkan pesan ke set
+                    
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('message-item');
+                    messageElement.innerHTML = `
+                        <h4>${message.name}</h4>
+                        <p>${message.message}</p>
+                        <p class="attendance-status">${message.attendance}</p>
+                    `;
+                    messagesContainer.appendChild(messageElement);
+                }
             });
+        })
+        .catch(error => {
+            console.error('Error fetching messages:', error);
         });
 }
 
@@ -133,10 +147,13 @@ function fetchAttendanceCounts() {
             document.getElementById('hadirCount').textContent = data.hadir;
             document.getElementById('tidakHadirCount').textContent = data.tidakHadir;
             document.getElementById('raguCount').textContent = data.ragu;
+        })
+        .catch(error => {
+            console.error('Error fetching attendance counts:', error);
         });
 }
 
-// Event listener untuk form submit
+// Event listener untuk form RSVP
 rsvpForm.addEventListener('submit', function(event) {
     event.preventDefault(); // Mencegah halaman refresh
 
@@ -145,7 +162,7 @@ rsvpForm.addEventListener('submit', function(event) {
     const message = document.getElementById('message').value;
     const attendance = document.getElementById('attendance').value;
 
-    // Mengirim data ke server Glitch
+    // Mengirim data ke server
     fetch('https://ogik-tuhfah.glitch.me/rsvp', {
         method: 'POST',
         headers: {
@@ -159,7 +176,8 @@ rsvpForm.addEventListener('submit', function(event) {
         // Reset form setelah submit
         rsvpForm.reset();
         // Refresh daftar RSVP dan jumlah kehadiran
-        displayRSVPs();
+        fetchMessages();
+        fetchAttendanceCounts();
     })
     .catch(error => {
         responseMessage.textContent = 'Terjadi kesalahan, coba lagi nanti.';
@@ -167,6 +185,6 @@ rsvpForm.addEventListener('submit', function(event) {
     });
 });
 
-// Panggil displayRSVPs() saat halaman pertama kali dimuat
+// Panggil fetchMessages() saat halaman pertama kali dimuat
 fetchMessages();
 fetchAttendanceCounts();
